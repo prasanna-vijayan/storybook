@@ -26,11 +26,6 @@ jobs:
       # Step 4: Build Storybook (this will generate the `storybook-static` directory)
       - run: pnpm build-storybook
       
-      # Step 5: Publish the package to GitHub Packages
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.PAT1 }}
-
       # Step 6: Deploy Storybook to Netlify
       - name: Deploy to Netlify
         run: NETLIFY_AUTH_TOKEN=${{ secrets.DEPLOY_TOKEN }} netlify deploy --prod --dir=storybook-static --site=${{ secrets.SITE_ID }}
