@@ -1,0 +1,36 @@
+name: Publish package to GitHub Packages and Deploy Storybook to Netlify
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # Step 1: Checkout code
+      - uses: actions/checkout@v4
+      
+      # Step 2: Setup Node environment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10.0'
+          registry-url: 'https://npm.pkg.github.com'
+
+      # Step 3: Enable Corepack and install pnpm dependencies
+      - run: corepack enable
+      - run: pnpm -v
+      - run: pnpm install
+
+      # Step 4: Build Storybook (this will generate the `storybook-static` directory)
+      - run: pnpm build-storybook
+      
+      # Step 5: Publish the package to GitHub Packages
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PAT1 }}
+
+      # Step 6: Deploy Storybook to Netlify
+      - name: Deploy to Netlify
+        run: NETLIFY_AUTH_TOKEN=${{ secrets.DEPLOY_TOKEN }} netlify deploy --prod --dir=storybook-static --site=${{ secrets.SITE_ID }}
